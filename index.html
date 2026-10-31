@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>大学生恋爱等级测评</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(160deg, #fff0f5 0%, #ffe3ec 55%, #ffd6e0 100%);
+    min-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+  }
+  .card {
+    width: 100%;
+    max-width: 480px;
+    background: #ffffff;
+    border-radius: 22px;
+    box-shadow: 0 18px 45px rgba(214, 51, 108, 0.16);
+    padding: 28px 22px;
+  }
+  .title {
+    text-align: center;
+    font-size: 23px;
+    font-weight: 700;
+    color: #d6336c;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: #a0a0a0;
+    margin-top: 8px;
+  }
+  .progress-text {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: #d6336c;
+    margin-top: 20px;
+  }
+  .progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #f5dbe4;
+    border-radius: 6px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #f783ac, #d6336c);
+    border-radius: 6px;
+    transition: width 0.25s ease;
+  }
+  .question {
+    font-size: 17px;
+    font-weight: 700;
+    color: #333333;
+    line-height: 1.55;
+    margin-top: 22px;
+  }
+  .options { margin-top: 18px; }
+  .option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: 1.5px solid #f0d7df;
+    background: #fffafc;
+    border-radius: 14px;
+    padding: 14px 15px;
+    margin-bottom: 11px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #444444;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .option:active { transform: scale(0.985); }
+  .option.selected {
+    border-color: #d6336c;
+    background: #fff0f5;
+    color: #d6336c;
+    font-weight: 600;
+  }
+  .option b { color: #d6336c; margin-right: 6px; }
+  .buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 22px;
+  }
+  .btn {
+    flex: 1;
+    border: none;
+    border-radius: 14px;
+    padding: 14px 0;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+  .btn:active { opacity: 0.8; }
+  .btn-prev { background: #e9ecef; color: #6c757d; }
+  .btn-prev:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-next { background: #d6336c; color: #ffffff; }
+  .start-btn {
+    display: block;
+    width: 100%;
+    margin-top: 30px;
+    border: none;
+    border-radius: 16px;
+    padding: 16px 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: #ffffff;
+    background: linear-gradient(90deg, #f783ac, #d6336c);
+    cursor: pointer;
+  }
+  .start-btn:active { opacity: 0.85; }
+  .result-icon { text-align: center; font-size: 48px; margin-top: 6px; }
+  .result-score { text-align: center; font-size: 15px; color: #666; margin-top: 12px; }
+  .result-level {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 800;
+    color: #d6336c;
+    margin-top: 10px;
+  }
+  .result-advice {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.7;
+    margin-top: 18px;
+    text-align: justify;
+  }
+  .restart-btn {
+    display: block;
+    width: 100%;
+    margin-top: 26px;
+    border: none;
+    border-radius: 16px;
+    padding: 15px 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    background: #d6336c;
+    cursor: pointer;
+  }
+  .restart-btn:active { opacity: 0.85; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+  <div class="card" id="card">
+    <div class="title">💗 大学生恋爱等级测评</div>
+    <div class="subtitle">正在加载问卷，请稍候…</div>
+    <noscript>
+      <div class="result-advice" style="margin-top:18px;">
+        当前环境没有开启 JavaScript，问卷无法运行。<br>
+        请用手机自带的浏览器（Safari / Chrome / Edge）打开本文件。
+      </div>
+    </noscript>
+  </div>
+
+<script>
+const questions = [
+  { q: "1. 和喜欢的人单独聊天时，你通常：",
+    A: "紧张得不知道说什么好",
+    B: "能聊几句，但容易冷场",
+    C: "比较自然，能找到共同话题",
+    D: "轻松愉快，还能逗对方开心" },
+  { q: "2. 发现对方心情不好时，你会：",
+    A: "装作没看见，怕说错话",
+    B: "问一句“怎么了”，但不会深究",
+    C: "主动关心，安静地陪在对方身边",
+    D: "想办法帮对方分析问题并安慰鼓励" },
+  { q: "3. 恋爱中遇到分歧时，你会：",
+    A: "坚持自己是对的，不肯让步",
+    B: "嘴上不说，心里憋着不开心",
+    C: "先冷静一下，再和对方好好沟通",
+    D: "主动表达感受，也耐心听对方的想法" },
+  { q: "4. 对于对方的兴趣爱好，你会：",
+    A: "不太关心，觉得和自己无关",
+    B: "知道一些，但很少参与",
+    C: "愿意了解，偶尔一起尝试",
+    D: "主动了解并参与，享受共同的乐趣" },
+  { q: "5. 表达关心和制造小惊喜方面，你会：",
+    A: "很少表达，觉得对方应该懂",
+    B: "偶尔想起来才会表示一下",
+    C: "节日和重要日子会用心准备",
+    D: "平时也常留意对方需要，及时给惊喜" },
+  { q: "6. 看到对方和异性正常交往时，你会：",
+    A: "很生气，要求对方断绝来往",
+    B: "心里不舒服，但嘴上不说",
+    C: "基本信任，但会适当了解情况",
+    D: "完全信任，尊重对方的正常社交" },
+  { q: "7. 谈恋爱和学习、生活之间，你会：",
+    A: "整天围着对方转，荒废学业",
+    B: "常因约会打乱自己的计划",
+    C: "尽量平衡，但偶尔会顾此失彼",
+    D: "合理安排时间，恋爱学业两不误" },
+  { q: "8. 关于“安全感”，你的看法是：",
+    A: "对方必须时刻报备行踪",
+    B: "需要对方不断证明爱自己",
+    C: "希望双方都能坦诚相待",
+    D: "彼此信任，给足空间也能安心" },
+  { q: "9. 吵架之后，你通常会：",
+    A: "冷战到底，等对方先低头",
+    B: "过很久才勉强说话",
+    C: "冷静后主动沟通解决",
+    D: "及时修复关系，还懂得反思自己" },
+  { q: "10. 对于一段感情的结束，你会：",
+    A: "走不出来，一直纠缠或怨恨",
+    B: "很难过，需要很长时间恢复",
+    C: "会难过，但能慢慢调整心态",
+    D: "尊重结果，从中成长并祝福对方" }
+];
+
+const scoreMap = { A: 1, B: 2, C: 3, D: 4 };
+let index = 0;
+let answers = new Array(questions.length).fill(null);
+
+const card = document.getElementById("card");
+
+function getResult(total) {
+  if (total <= 17) return ["恋爱青铜（新手期）", "你还在学习如何与喜欢的人相处，别着急，真诚和用心是最好的起点。"];
+  if (total <= 24) return ["恋爱白银（进阶期）", "你已经有不错的恋爱基础，多练习沟通和表达，感情会更顺利。"];
+  if (total <= 32) return ["恋爱黄金（达人）", "你懂得经营感情，懂得关心和沟通，继续保持这份成熟。"];
+  return ["恋爱钻石（王者）", "你的恋爱情商很高，既懂爱人也会爱自己，是让人安心的另一半。"];
+}
+
+function renderStart() {
+  card.innerHTML = `
+    <div class="title">💗 大学生恋爱等级测评</div>
+    <div class="subtitle">10 道题，测测你的恋爱等级</div>
+    <button class="start-btn" id="startBtn">开始测评</button>`;
+  document.getElementById("startBtn").addEventListener("click", renderQuestion);
+}
+
+function renderQuestion() {
+  const item = questions[index];
+  const keys = ["A", "B", "C", "D"];
+  const current = answers[index];
+
+  let optionsHtml = "";
+  keys.forEach((key) => {
+    const selected = current === key ? " selected" : "";
+    optionsHtml += `<button class="option${selected}" data-key="${key}"><b>${key}.</b>${item[key]}</button>`;
+  });
+
+  card.innerHTML = `
+    <div class="title">大学生恋爱等级测评</div>
+    <div class="progress-text">第 ${index + 1} / ${questions.length} 题</div>
+    <div class="progress-bar"><div class="progress-fill" id="fill"></div></div>
+    <div class="question">${item.q}</div>
+    <div class="options">${optionsHtml}</div>
+    <div class="buttons">
+      <button class="btn btn-prev" id="prevBtn" ${index === 0 ? "disabled" : ""}>上一题</button>
+      <button class="btn btn-next" id="nextBtn">${index === questions.length - 1 ? "查看结果" : "下一题"}</button>
+    </div>`;
+
+  requestAnimationFrame(() => {
+    document.getElementById("fill").style.width = ((index + 1) / questions.length * 100) + "%";
+  });
+
+  document.querySelectorAll(".option").forEach((btn) => {
+    btn.addEventListener("click", () => select(btn.dataset.key));
+  });
+  document.getElementById("prevBtn").addEventListener("click", prev);
+  document.getElementById("nextBtn").addEventListener("click", next);
+}
+
+function select(key) {
+  answers[index] = key;
+  document.querySelectorAll(".option").forEach((btn) => {
+    btn.classList.toggle("selected", btn.dataset.key === key);
+  });
+}
+
+function next() {
+  if (answers[index] === null) {
+    alert("请先选择一个选项哦！");
+    return;
+  }
+  if (index < questions.length - 1) {
+    index++;
+    renderQuestion();
+  } else {
+    renderResult();
+  }
+}
+
+function prev() {
+  if (index > 0) {
+    index--;
+    renderQuestion();
+  }
+}
+
+function renderResult() {
+  const total = answers.reduce((sum, a) => sum + scoreMap[a], 0);
+  const [level, advice] = getResult(total);
+  const icons = { 1: "🥉", 2: "🥈", 3: "🥇", 4: "💎" };
+  let icon = "💗";
+  if (total <= 17) icon = icons[1];
+  else if (total <= 24) icon = icons[2];
+  else if (total <= 32) icon = icons[3];
+  else icon = icons[4];
+
+  card.innerHTML = `
+    <div class="title">测评结果</div>
+    <div class="result-icon">${icon}</div>
+    <div class="result-score">你的总得分：${total} 分</div>
+    <div class="result-level">${level}</div>
+    <div class="result-advice">${advice}</div>
+    <button class="restart-btn" id="restartBtn">重新测评</button>`;
+  document.getElementById("restartBtn").addEventListener("click", restart);
+}
+
+function restart() {
+  index = 0;
+  answers = new Array(questions.length).fill(null);
+  renderStart();
+}
+
+renderStart();
+</script>
+</body>
+</html>
